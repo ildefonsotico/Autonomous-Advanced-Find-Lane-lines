@@ -100,11 +100,17 @@ def calibrate_camera(images, nx=9, ny=6, verbose=false):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         dst = cv2.undistort(img, mtx, dist, None, mtx)
-
+        cv2.imwrite('image_undistord.jpg', dst)
         if(verbose):
-            cv2.imwrite('test_undist.jpg', dst)
             cv2.imshow('undistord', dst)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
+    return objpoints, imgpoints
+
+def calculate_undistord(img, objpoints, imgpoints):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+    dst = cv2.undistort(img, mtx, dist, None, mtx)
+    cv2.imwrite('image_calc_undistord.jpg', dst)
     return dst
