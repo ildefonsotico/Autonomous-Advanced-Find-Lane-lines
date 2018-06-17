@@ -66,7 +66,7 @@ def hls_select(img, thresh=(0, 255)):
     binary_output = np.zeros_like(s_channel)
     binary_output[(s_channel > thresh[0]) & (s_channel <= thresh[1])] = 1
     return binary_output
-def calibrate_camera(images, nx=9, ny=6, verbose=false):
+def calibrate_camera(images, nx=9, ny=6, verbose=False):
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((ny * nx, 3), np.float32)
@@ -108,9 +108,33 @@ def calibrate_camera(images, nx=9, ny=6, verbose=false):
 
     return objpoints, imgpoints
 
-def calculate_undistord(img, objpoints, imgpoints):
+def calculate_undistord(img, objpoints, imgpoints, verbose=False):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     dst = cv2.undistort(img, mtx, dist, None, mtx)
     cv2.imwrite('image_calc_undistord.jpg', dst)
+    if (verbose):
+        cv2.imshow('undistord', dst)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
     return dst
+def warp(img):
+    img_size = (img.shape[1], img.shape[0])
+
+    #source image
+    src = np.float32([[690, 450],
+                     [1040, 685],
+                     [250, 690],
+                     [590, 450]]
+                     )
+
+    #destination image
+    dst = np.float32([[980, 0], [980, 720], [320, 720], [320, 0]])
+
+    M = cv2.getPerspectiveTransform(src, dst)
+    warped = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
+    cv2.imshow('warped', warped)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    return warped
