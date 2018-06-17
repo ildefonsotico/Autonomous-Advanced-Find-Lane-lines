@@ -66,7 +66,7 @@ def hls_select(img, thresh=(0, 255)):
     binary_output = np.zeros_like(s_channel)
     binary_output[(s_channel > thresh[0]) & (s_channel <= thresh[1])] = 1
     return binary_output
-def calibrate_camera(images, nx=9, ny=6):
+def calibrate_camera(images, nx=9, ny=6, verbose=false):
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((ny * nx, 3), np.float32)
@@ -77,26 +77,34 @@ def calibrate_camera(images, nx=9, ny=6):
     imgpoints = []  # 2d points in image plane.
 
     for file_name in enumerate(images):
-        print(file_name[1])
-        img = cv2.imread(file_name)
+
+        img = cv2.imread(file_name[1])
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # Find the chessboard corners
         ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
-        print (ret)
-        print (corners)
+        #print (ret)
+        #print (corners)
         # If found, draw corners
         if ret == True:
-            print ("Entered Corners")
+            objpoints.append(objp)
+            imgpoints.append(corners)
             # Draw and display the corners
             cv2.drawChessboardCorners(img, (nx, ny), corners, ret)
-            cv2.imshow('chessboardcorner', img)
+            # cv2.imshow('chessboardcorner', img)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+
+    for file_name in enumerate(images):
+        img = cv2.imread(file_name[1])
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+        dst = cv2.undistort(img, mtx, dist, None, mtx)
+
+        if(verbose):
+            cv2.imwrite('test_undist.jpg', dst)
+            cv2.imshow('undistord', dst)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-           # ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-            #dst = cv2.undistort(img, mtx, dist, None, mtx)
-            #cv2.imshow('undistord', dst)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
-            # plt.imshow(img)
+
     return dst
