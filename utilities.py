@@ -160,3 +160,89 @@ def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
     plt.savefig('binary_matplot.png')
     # Return the result
     return binary_output
+
+def combining_tecniques(gradx,grady, mag_binary, dir_binary):
+    combined = np.zeros_like(dir_binary)
+    combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+    plt.imshow(combined, cmap='gray')
+    plt.savefig(out_path + 'binary_combined.png')
+    return combined
+
+def store_RGB_separately(img):
+    R = img[:, :, 0]
+    G = img[:, :, 1]
+    B = img[:, :, 2]
+    plt.imshow(R)
+    plt.savefig(out_path + 'red_channel.png')
+    plt.imshow(G)
+    plt.savefig(out_path + 'green_channel.png')
+    plt.imshow(B)
+    plt.savefig(out_path + 'blue_channel.png')
+
+def convert_RGB_HLS(img):
+    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    H = hls[:, :, 0]
+    L = hls[:, :, 1]
+    S = hls[:, :, 2]
+
+    binary_S(S)
+    binary_H(H)
+    binary_L(L)
+
+    plt.imshow(H)
+    plt.savefig(out_path + 'h_channel.png')
+    plt.imshow(L)
+    plt.savefig(out_path + 'l_channel.png')
+    plt.imshow(S)
+    plt.savefig(out_path + 's_channel.png')
+    return hls
+
+def binary_S(s):
+    thresh = (90, 255)
+    binary = np.zeros_like(s)
+    binary[(s > thresh[0]) & (s <= thresh[1])] = 1
+    plt.imshow(binary, cmap='gray')
+    plt.savefig(out_path + 's_binary_threshold_channel.png')
+
+def binary_H(h):
+    thresh = (15, 100)
+    binary = np.zeros_like(h)
+    binary[(h > thresh[0]) & (h <= thresh[1])] = 1
+    plt.imshow(binary, cmap='gray')
+    plt.savefig(out_path + 'h_binary_threshold_channel.png')
+
+def binary_L(l):
+    thresh = (30, 100)
+    binary = np.zeros_like(l)
+    binary[(l > thresh[0]) & (l <= thresh[1])] = 1
+    plt.imshow(binary, cmap='gray')
+    plt.savefig(out_path + 'l_binary_threshold_channel.png')
+
+
+def pipeline(img, s_thresh=(120, 255), sx_thresh=(50, 150)):
+    img = np.copy(img)
+    # Convert to HLS color space and separate the V channel
+    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    l_channel = hls[:, :, 1]
+    s_channel = hls[:, :, 2]
+    # Sobel x
+    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0)  # Take the derivative in x
+    abs_sobelx = np.absolute(sobelx)  # Absolute x derivative to accentuate lines away from horizontal
+    scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
+
+    # Threshold x gradient
+    sxbinary = np.zeros_like(scaled_sobel)
+    sxbinary[(scaled_sobel >= sx_thresh[0]) & (scaled_sobel <= sx_thresh[1])] = 1
+
+    # Threshold color channel
+    s_binary = np.zeros_like(s_channel)
+    s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
+    # Stack each channel
+    color_binary = np.dstack((np.zeros_like(sxbinary), sxbinary, s_binary)) * 255
+    combined_binary = np.zeros_like(sxbinary)
+    combined_binary[(s_binary == 1) | (sxbinary == 1)] = 1
+    plt.imshow(color_binary)
+    plt.savefig(out_path + 'pipeline_stack_gradient_color.png')
+    plt.imshow(combined_binary, cmap='gray')
+    plt.savefig(out_path + 'pipeline_combined_gradient_color.png')
+    return color_binary, combined_binary
