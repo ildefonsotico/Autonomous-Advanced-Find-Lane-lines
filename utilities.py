@@ -3,7 +3,9 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2)):
+out_path='output_images\\'
+
+def direction_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2)):
     # Grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Calculate the x and y gradients
@@ -14,47 +16,34 @@ def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2)):
     absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
     binary_output = np.zeros_like(absgraddir)
     binary_output[(absgraddir >= thresh[0]) & (absgraddir <= thresh[1])] = 1
+    plt.imshow(binary_output, cmap='gray')
+    plt.savefig(out_path + 'binary_direction.png')
     return binary_output
-
 
 def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
+    # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # Take both Sobel x and y gradients
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
-    npgrad = np.sqrt(sobelx ** 2 + sobely ** 2)
-    scale_factor = np.max(npgrad) / 255
-    npgrad = (npgrad / scale_factor).astype(np.uint8)
+
+    plt.imshow(sobelx, cmap='gray')
+    plt.savefig(out_path+'sobel_x.png')
+    plt.imshow(sobely, cmap='gray')
+    plt.savefig(out_path+'sobel_y.png')
+
+    # Calculate the gradient magnitude
+    gradmag = np.sqrt(sobelx**2 + sobely**2)
+    # Rescale to 8 bit
+    scale_factor = np.max(gradmag)/255
+    gradmag = (gradmag/scale_factor).astype(np.uint8)
     # Create a binary image of ones where threshold is met, zeros otherwise
-    binary_output = np.zeros_like(npgrad)
-    binary_output[(npgrad >= mag_thresh[0]) & (npgrad <= mag_thresh[1])] = 1
-    # Apply the following steps to img
-    # 1) Convert to grayscale
-    # 2) Take the gradient in x and y separately
-    # 3) Calculate the magnitude
-    # 4) Scale to 8-bit (0 - 255) and convert to type = np.uint8
-    # 5) Create a binary mask where mag thresholds are met
-    # 6) Return this mask as your binary_output image
-    return binary_output
-
-
-def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)
-    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1)
-    abs_sobelx = np.absolute(sobelx)
-    scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
-    sxbinary = np.zeros_like(scaled_sobel)
-    sxbinary[(scaled_sobel >= thresh_min) & (scaled_sobel <= thresh_max)] = 1
-    plt.imshow(sxbinary, cmap='gray')
-    # Apply the following steps to img
-    # 1) Convert to grayscale
-    # 2) Take the derivative in x or y given orient = 'x' or 'y'
-    # 3) Take the absolute value of the derivative or gradient
-    # 4) Scale to 8-bit (0 - 255) then convert to type = np.uint8
-    # 5) Create a mask of 1's where the scaled gradient magnitude
-    # is > thresh_min and < thresh_max
-    # 6) Return this mask as your binary_output image
-    binary_output = sxbinary  # Remove this line
+    binary_output = np.zeros_like(gradmag)
+    binary_output[(gradmag >= mag_thresh[0]) & (gradmag <= mag_thresh[1])] = 1
+    plt.imshow(binary_output, cmap='gray')
+    plt.savefig(out_path+'binary_magnitude.png')
+    # Return the binary image
     return binary_output
 
 def hls_select(img, thresh=(0, 255)):
@@ -100,7 +89,8 @@ def calibrate_camera(images, nx=9, ny=6, verbose=False):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         dst = cv2.undistort(img, mtx, dist, None, mtx)
-        cv2.imwrite('image_undistord.jpg', dst)
+        plt.imshow(dst)
+        plt.savefig(out_path + 'image_undistorded.png')
         if(verbose):
             cv2.imshow('undistord', dst)
             cv2.waitKey(0)
@@ -109,16 +99,17 @@ def calibrate_camera(images, nx=9, ny=6, verbose=False):
     return objpoints, imgpoints
 
 def calculate_undistord(img, objpoints, imgpoints, verbose=False):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     dst = cv2.undistort(img, mtx, dist, None, mtx)
-    cv2.imwrite('image_calc_undistord.jpg', dst)
+    plt.imshow(dst)
+    plt.savefig(out_path + 'image_calc_undistorded.png')
     if (verbose):
         cv2.imshow('undistord', dst)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return dst
-def warp(img):
+def warp(img, verbose=False):
     img_size = (img.shape[1], img.shape[0])
 
     #source image
@@ -133,8 +124,39 @@ def warp(img):
 
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
-    cv2.imshow('warped', warped)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if (verbose):
+        cv2.imshow('warped', warped)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
     return warped
+
+def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # Apply x or y gradient with the OpenCV Sobel() function
+    # and take the absolute value
+
+    if orient == 'x':
+        abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 1, 0))
+        cv2.imwrite('sobelx.png', abs_sobel)
+        plt.imshow(abs_sobel, cmap='gray')
+        plt.savefig('abs_sobel_x.png')
+    if orient == 'y':
+        abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 0, 1))
+        plt.imshow(abs_sobel, cmap='gray')
+        plt.savefig('abs_sobel_y.png')
+
+
+    # Rescale back to 8 bit integer
+    scaled_sobel = np.uint8(255*abs_sobel/np.max(abs_sobel))
+
+    # Create a copy and apply the threshold
+    binary_output = np.zeros_like(scaled_sobel)
+
+    # Here I'm using inclusive (>=, <=) thresholds, but exclusive is ok too
+    binary_output[(scaled_sobel >= thresh_min) & (scaled_sobel <= thresh_max)] = 1
+    plt.imshow(binary_output, cmap='gray')
+    plt.savefig('binary_matplot.png')
+    # Return the result
+    return binary_output
