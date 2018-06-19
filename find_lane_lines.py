@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import time
-from utilities import calibrate_camera,get_line_fit_from_pre_defined, sliding_window, histogram, pipeline, convert_RGB_HLS, calculate_undistord, store_RGB_separately, warp, mag_thresh, direction_threshold, abs_sobel_thresh, combining_tecniques
+from utilities import calibrate_camera, draw_lane, get_line_fit_from_pre_defined, sliding_window, histogram, pipeline, convert_RGB_HLS, calculate_undistord, store_RGB_separately, warp, mag_thresh, direction_threshold, abs_sobel_thresh, combining_tecniques
 import glob
 
 
@@ -20,7 +20,7 @@ nx = 9
 ny = 6
 objpoints, imgpoints = calibrate_camera(images_list, nx, ny)
 dst = calculate_undistord(test_image, objpoints, imgpoints)
-warped = warp(dst, 'warped.png')
+warped, MInv = warp(dst, 'warped.png')
 
 cv2.imshow('undistord', dst)
 cv2.waitKey(0)
@@ -33,13 +33,10 @@ comb = combining_tecniques(sobel_x, sobel_y, mag_bin, dir_bin)
 store_RGB_separately(dst)
 hls_img = convert_RGB_HLS(dst)
 color_merged, combined_bin = pipeline(dst, (90, 200), (30,100))
-warped = warp(combined_bin, 'combined_bin_warped.png')
+warped, MInv = warp(combined_bin, 'combined_bin_warped.png')
 #histogram(warped)
 left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = sliding_window(warped)
 get_line_fit_from_pre_defined(warped,left_fit, right_fit, 100 )
-#get_line_fit_from_pre_defined(warped)
-#img_bin = direction_threshold(img, 5, (30, 100))
-# cv2.imshow('Binary', img_bin)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
-# Convert to grayscale
+
+draw_lane(dst, warped, left_fit, right_fit, MInv)
+
