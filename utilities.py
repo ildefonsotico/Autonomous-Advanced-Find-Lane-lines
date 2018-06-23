@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 out_path='output_images\\'
+ym_per_pix = 30 / 720  # meters per pixel in y dimension
+xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
 
-def direction_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2)):
+def direction_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2), verbose=False):
     # Grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Calculate the x and y gradients
@@ -16,11 +18,12 @@ def direction_threshold(img, sobel_kernel=3, thresh=(0, np.pi / 2)):
     absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
     binary_output = np.zeros_like(absgraddir)
     binary_output[(absgraddir >= thresh[0]) & (absgraddir <= thresh[1])] = 1
-    plt.imshow(binary_output, cmap='gray')
-    plt.savefig(out_path + 'binary_direction.png')
+    if (verbose):
+        plt.imshow(binary_output, cmap='gray')
+        plt.savefig(out_path + 'binary_direction.png')
     return binary_output
 
-def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
+def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255), verbose=False):
     # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
@@ -28,10 +31,11 @@ def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
 
-    plt.imshow(sobelx, cmap='gray')
-    plt.savefig(out_path+'sobel_x.png')
-    plt.imshow(sobely, cmap='gray')
-    plt.savefig(out_path+'sobel_y.png')
+    if (verbose):
+        plt.imshow(sobelx, cmap='gray')
+        plt.savefig(out_path+'sobel_x.png')
+        plt.imshow(sobely, cmap='gray')
+        plt.savefig(out_path+'sobel_y.png')
 
     # Calculate the gradient magnitude
     gradmag = np.sqrt(sobelx**2 + sobely**2)
@@ -41,8 +45,9 @@ def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
     # Create a binary image of ones where threshold is met, zeros otherwise
     binary_output = np.zeros_like(gradmag)
     binary_output[(gradmag >= mag_thresh[0]) & (gradmag <= mag_thresh[1])] = 1
-    plt.imshow(binary_output, cmap='gray')
-    plt.savefig(out_path+'binary_magnitude.png')
+    if (verbose):
+        plt.imshow(binary_output, cmap='gray')
+        plt.savefig(out_path+'binary_magnitude.png')
     # Return the binary image
     return binary_output
 
@@ -89,12 +94,10 @@ def calibrate_camera(images, nx=9, ny=6, verbose=False):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         dst = cv2.undistort(img, mtx, dist, None, mtx)
-        plt.imshow(dst)
-        plt.savefig(out_path + 'image_undistorded.png')
+
         if(verbose):
-            cv2.imshow('undistord', dst)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            plt.imshow(dst)
+            plt.savefig(out_path + 'image_undistorded.png')
 
     return objpoints, imgpoints
 
@@ -102,12 +105,10 @@ def calculate_undistord(img, objpoints, imgpoints, verbose=False):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     dst = cv2.undistort(img, mtx, dist, None, mtx)
-    plt.imshow(dst)
-    plt.savefig(out_path + 'image_calc_undistorded.png')
+
     if (verbose):
-        cv2.imshow('undistord', dst)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        plt.imshow(dst)
+        plt.savefig(out_path + 'image_calc_undistorded.png')
     return dst
 def warp(img, s, verbose=False):
     img_size = (img.shape[1], img.shape[0])
@@ -126,19 +127,17 @@ def warp(img, s, verbose=False):
     M_Inv = cv2.getPerspectiveTransform(dst, src)
     warped = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
 
-    plt.imshow(warped, cmap='gray')
-    plt.plot(980,0,'.')
-    plt.plot(980, 720, '.')
-    plt.plot(320, 720, '.')
-    plt.plot(320, 0, '.')
-    plt.savefig(out_path + s)
+
     if (verbose):
-        cv2.imshow('warped', warped)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        plt.imshow(warped, cmap='gray')
+        plt.plot(980, 0, '.')
+        plt.plot(980, 720, '.')
+        plt.plot(320, 720, '.')
+        plt.plot(320, 0, '.')
+        plt.savefig(out_path + s)
     return warped, M_Inv
 
-def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
+def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255, verbose=False):
     # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
@@ -148,12 +147,14 @@ def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
     if orient == 'x':
         abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 1, 0))
         cv2.imwrite('sobelx.png', abs_sobel)
-        plt.imshow(abs_sobel, cmap='gray')
-        plt.savefig('abs_sobel_x.png')
+        if (verbose):
+            plt.imshow(abs_sobel, cmap='gray')
+            plt.savefig('abs_sobel_x.png')
     if orient == 'y':
         abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 0, 1))
-        plt.imshow(abs_sobel, cmap='gray')
-        plt.savefig('abs_sobel_y.png')
+        if (verbose):
+            plt.imshow(abs_sobel, cmap='gray')
+            plt.savefig('abs_sobel_y.png')
 
 
     # Rescale back to 8 bit integer
@@ -164,45 +165,50 @@ def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
 
     # Here I'm using inclusive (>=, <=) thresholds, but exclusive is ok too
     binary_output[(scaled_sobel >= thresh_min) & (scaled_sobel <= thresh_max)] = 1
-    plt.imshow(binary_output, cmap='gray')
-    plt.savefig('binary_matplot.png')
+    if (verbose):
+        plt.imshow(binary_output, cmap='gray')
+        plt.savefig('binary_matplot.png')
     # Return the result
     return binary_output
 
-def combining_tecniques(gradx,grady, mag_binary, dir_binary):
+def combining_tecniques(gradx,grady, mag_binary, dir_binary, verbose=False):
     combined = np.zeros_like(dir_binary)
     combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
-    plt.imshow(combined, cmap='gray')
-    plt.savefig(out_path + 'binary_combined.png')
+    if (verbose):
+        plt.imshow(combined, cmap='gray')
+        plt.savefig(out_path + 'binary_combined.png')
     return combined
 
-def store_RGB_separately(img):
+def store_RGB_separately(img, verbose=False):
     R = img[:, :, 0]
     G = img[:, :, 1]
     B = img[:, :, 2]
-    plt.imshow(R)
-    plt.savefig(out_path + 'red_channel.png')
-    plt.imshow(G)
-    plt.savefig(out_path + 'green_channel.png')
-    plt.imshow(B)
-    plt.savefig(out_path + 'blue_channel.png')
+    if (verbose):
+        plt.imshow(R)
+        plt.savefig(out_path + 'red_channel.png')
+        plt.imshow(G)
+        plt.savefig(out_path + 'green_channel.png')
+        plt.imshow(B)
+        plt.savefig(out_path + 'blue_channel.png')
 
-def convert_RGB_HLS(img):
+def convert_RGB_HLS(img, verbose=False):
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
     H = hls[:, :, 0]
     L = hls[:, :, 1]
     S = hls[:, :, 2]
 
-    binary_S(S)
-    binary_H(H)
-    binary_L(L)
 
-    plt.imshow(H)
-    plt.savefig(out_path + 'h_channel.png')
-    plt.imshow(L)
-    plt.savefig(out_path + 'l_channel.png')
-    plt.imshow(S)
-    plt.savefig(out_path + 's_channel.png')
+
+    if (verbose):
+        binary_S(S)
+        binary_H(H)
+        binary_L(L)
+        plt.imshow(H)
+        plt.savefig(out_path + 'h_channel.png')
+        plt.imshow(L)
+        plt.savefig(out_path + 'l_channel.png')
+        plt.imshow(S)
+        plt.savefig(out_path + 's_channel.png')
     return hls
 
 def binary_S(s):
@@ -227,7 +233,7 @@ def binary_L(l):
     plt.savefig(out_path + 'l_binary_threshold_channel.png')
 
 
-def pipeline(img, s_thresh=(120, 255), sx_thresh=(50, 150)):
+def pipeline(img, s_thresh=(120, 255), sx_thresh=(50, 150), verbose=False):
     img = np.copy(img)
     # Convert to HLS color space and separate the V channel
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
@@ -249,10 +255,12 @@ def pipeline(img, s_thresh=(120, 255), sx_thresh=(50, 150)):
     color_binary = np.dstack((np.zeros_like(sxbinary), sxbinary, s_binary)) * 255
     combined_binary = np.zeros_like(sxbinary)
     combined_binary[(s_binary == 1) | (sxbinary == 1)] = 1
-    plt.imshow(color_binary)
-    plt.savefig(out_path + 'pipeline_stack_gradient_color.png')
-    plt.imshow(combined_binary, cmap='gray')
-    plt.savefig(out_path + 'pipeline_combined_gradient_color.png')
+
+    if (verbose):
+        plt.imshow(color_binary)
+        plt.savefig(out_path + 'pipeline_stack_gradient_color.png')
+        plt.imshow(combined_binary, cmap='gray')
+        plt.savefig(out_path + 'pipeline_combined_gradient_color.png')
     return color_binary, combined_binary
 
 def histogram(img):
@@ -262,7 +270,7 @@ def histogram(img):
 
     plt.savefig(out_path + 'histogram.png')
 
-def sliding_window(binary_warped):
+def sliding_window(binary_warped, verbose=False):
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0] // 2:, :], axis=0)
     # Create an output image to draw on and  visualize the result
@@ -340,21 +348,18 @@ def sliding_window(binary_warped):
     out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
     out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
 
-    plt.imshow(out_img)
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
-    plt.xlim(0, 1280)
-    plt.ylim(720, 0)
-
-    plt.savefig(out_path + 'sliding_window.png')
-
-
-
-    plt.savefig(out_path + 'fit_sliding_window.png')
+    if (verbose):
+        plt.imshow(out_img)
+        plt.plot(left_fitx, ploty, color='yellow')
+        plt.plot(right_fitx, ploty, color='yellow')
+        plt.xlim(0, 1280)
+        plt.ylim(720, 0)
+        plt.savefig(out_path + 'sliding_window.png')
+        plt.savefig(out_path + 'fit_sliding_window.png')
 
     return left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx
 
-def get_line_fit_from_pre_defined(binary_warped, left_fit, right_fit, margin=100):
+def get_line_fit_from_pre_defined(binary_warped, left_fit, right_fit, margin=100, verbose=False):
     nonzero = binary_warped.nonzero()
     nonzeroy = np.array(nonzero[0])
     nonzerox = np.array(nonzero[1])
@@ -381,38 +386,42 @@ def get_line_fit_from_pre_defined(binary_warped, left_fit, right_fit, margin=100
     ploty = np.linspace(0, binary_warped.shape[0] - 1, binary_warped.shape[0])
     left_fitx = left_fit[0] * ploty ** 2 + left_fit[1] * ploty + left_fit[2]
     right_fitx = right_fit[0] * ploty ** 2 + right_fit[1] * ploty + right_fit[2]
-    # Create an image to draw on and an image to show the selection window
-    out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
-    window_img = np.zeros_like(out_img)
-    # Color in left and right line pixels
-    out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-    out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
 
-    # Generate a polygon to illustrate the search window area
-    # And recast the x and y points into usable format for cv2.fillPoly()
-    left_line_window1 = np.array([np.transpose(np.vstack([left_fitx - margin, ploty]))])
-    left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx + margin,
-                                                                    ploty])))])
-    left_line_pts = np.hstack((left_line_window1, left_line_window2))
-    right_line_window1 = np.array([np.transpose(np.vstack([right_fitx - margin, ploty]))])
-    right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx + margin,
-                                                                     ploty])))])
-    right_line_pts = np.hstack((right_line_window1, right_line_window2))
+    # # Create an image to draw on and an image to show the selection window
+    # out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
+    # window_img = np.zeros_like(out_img)
+    # # Color in left and right line pixels
+    # out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
+    # out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+    #
+    # # Generate a polygon to illustrate the search window area
+    # # And recast the x and y points into usable format for cv2.fillPoly()
+    # left_line_window1 = np.array([np.transpose(np.vstack([left_fitx - margin, ploty]))])
+    # left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx + margin,
+    #                                                                 ploty])))])
+    # left_line_pts = np.hstack((left_line_window1, left_line_window2))
+    # right_line_window1 = np.array([np.transpose(np.vstack([right_fitx - margin, ploty]))])
+    # right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx + margin,
+    #                                                                  ploty])))])
+    # right_line_pts = np.hstack((right_line_window1, right_line_window2))
+    #
+    # # Draw the lane onto the warped blank image
+    # cv2.fillPoly(window_img, np.int_([left_line_pts]), (0, 255, 0))
+    # cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
+    # result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
-    # Draw the lane onto the warped blank image
-    cv2.fillPoly(window_img, np.int_([left_line_pts]), (0, 255, 0))
-    cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
-    result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-    plt.imshow(result)
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
-    plt.xlim(0, 1280)
-    plt.ylim(720, 0)
-    plt.savefig(out_path + 'sliding_pre_defined_window.png')
-    return result
+    # if (verbose):
+    #     plt.imshow(result)
+    #     plt.plot(left_fitx, ploty, color='yellow')
+    #     plt.plot(right_fitx, ploty, color='yellow')
+    #     plt.xlim(0, 1280)
+    #     plt.ylim(720, 0)
+    #     plt.savefig(out_path + 'sliding_pre_defined_window.png')
+
+    return left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx
 
 
-def draw_lane(image, binary_warped, left_fit, right_fit, m_inv):
+def draw_lane(image, binary_warped, left_fit, right_fit, m_inv, verbose=False):
     left_fitx, right_fitx, ploty = get_plot_points(image, left_fit, right_fit)
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(binary_warped).astype(np.uint8)
@@ -427,15 +436,17 @@ def draw_lane(image, binary_warped, left_fit, right_fit, m_inv):
     newwarp = cv2.warpPerspective(color_warp, m_inv, (image.shape[1], image.shape[0]))
     # Combine the result with the original image
     result = cv2.addWeighted(image, 1, newwarp, 0.3, 0)
-    plt.imshow(result)
-    plt.savefig(out_path + 'draw_lanes.png')
+    if(verbose):
+        plt.imshow(result)
+        plt.savefig(out_path + 'draw_lanes.png')
+
     return result
 
-def measure_curvatures(binary_warped, left_fit, right_fit):
+def measure_curvatures(warped, left_fit, right_fit):
     # Define conversions in x and y from pixels space to meters
-    ym_per_pix = 30 / 720  # meters per pixel in y dimension
-    xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
 
+    leftx, rightx, ploty = get_plot_points(warped, left_fit, right_fit)
+    y_eval = np.max(ploty)
     # Fit new polynomials to x,y in world space
     left_fit_cr = np.polyfit(ploty * ym_per_pix, leftx * xm_per_pix, 2)
     right_fit_cr = np.polyfit(ploty * ym_per_pix, rightx * xm_per_pix, 2)
@@ -445,7 +456,7 @@ def measure_curvatures(binary_warped, left_fit, right_fit):
     right_curverad = ((1 + (2 * right_fit_cr[0] * y_eval * ym_per_pix + right_fit_cr[1]) ** 2) ** 1.5) / np.absolute(
         2 * right_fit_cr[0])
     # Now our radius of curvature is in meters
-    print(left_curverad, 'm', right_curverad, 'm')
+    return left_curverad, right_curverad
 
 
 def get_plot_points(img, left_fit, right_fit):
@@ -453,3 +464,10 @@ def get_plot_points(img, left_fit, right_fit):
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
     return left_fitx, right_fitx, ploty
+
+def measure_car_offset(binary_warped, left_fit, right_fit):
+    left_fitx, right_fitx, ploty = get_plot_points(binary_warped, left_fit, right_fit)
+    car_center = binary_warped.shape[1] / 2
+    lane_center = (right_fitx[-1] - left_fitx[-1])
+    offset = (car_center - lane_center) * xm_per_pix
+    return offset
