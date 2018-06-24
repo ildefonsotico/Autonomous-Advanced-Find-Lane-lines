@@ -52,7 +52,7 @@ def pipe_verbose():
 
     left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = sliding_window(warped, True)
     get_line_fit_from_pre_defined(warped, left_fit, right_fit, 100, True)
-    draw_lane(dst, warped, left_fit, right_fit,MInv)
+    draw_lane(dst, warped, left_fit, right_fit,MInv, True)
 
     return objpoints, imgpoints
 
@@ -66,27 +66,27 @@ def process_image(img):
     global left_line
     global rigth_line
 
-    dst = calculate_undistord(img, objpoints, imgpoints)
-    color_merged, combined_bin = pipeline(dst, (90, 200), (30, 100))
-    warped, MInv = warp(combined_bin, 'combined_bin_warped.png')
+    dst = calculate_undistord(img, objpoints, imgpoints, False)
+    color_merged, combined_bin = pipeline(dst, (90, 200), (30, 100), False)
+    warped, MInv = warp(combined_bin, 'combined_bin_warped.png', False)
 
 
     if left_line.frame == 0:
-        left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = sliding_window(warped, True)
+        left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = sliding_window(warped, False)
     else:
-        left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = get_line_fit_from_pre_defined(warped, left_line.mean_fit(), rigth_line.mean_fit(), 100, True)
+        left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx = get_line_fit_from_pre_defined(warped, left_line.mean_fit(), rigth_line.mean_fit(), 100, False)
 
     left_line.add_fit(left_fit)
     rigth_line.add_fit(right_fit)
     left_line.frame += 1
     rigth_line.frame += 1
-    img = draw_lane(dst, warped, left_line.mean_fit(), rigth_line.mean_fit(), MInv)
+    img = draw_lane(dst, warped, left_line.mean_fit(), rigth_line.mean_fit(), MInv, False)
     curvature = np.mean(measure_curvatures(warped, left_line.mean_fit(), rigth_line.mean_fit()))
     car_offset = measure_car_offset(warped, left_line.mean_fit(), rigth_line.mean_fit())
-    font = cv2.FONT_HERSHEY_TRIPLEX
-    cv2.putText(img, 'Curvature`s Radius= ' + str(int(curvature)) + '(m)', (50, 100), font, 2, (255, 255, 255), 2,
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img, 'Radius of the Curvature = ' + str(int(curvature)) + '(m)', (50, 100), font, 2, (255, 255, 255), 2,
                 cv2.LINE_AA)
-    cv2.putText(img, 'Offset | Vehicle Center| = ' + str(round(car_offset, 2)) + '(m)', (50, 150), font, 2,
+    cv2.putText(img, 'Offset = ' + str(round(car_offset, 2)) + '(m)', (50, 150), font, 2,
                 (255, 255, 255), 2, cv2.LINE_AA)
     result = img
 
@@ -94,12 +94,12 @@ def process_image(img):
 
 
 
-vid_output = 'reg_vid.mp4'
+vid_output = 'chalenge_reg_vid.mp4'
 
-left_line  = Line(7)
-rigth_line = Line(7)
+left_line  = Line(1)
+rigth_line = Line(1)
 # The file referenced in clip1 is the original video before anything has been done to it
-clip1 = VideoFileClip("project_video.mp4")
+clip1 = VideoFileClip("challenge_video.mp4")
 
 # NOTE: this function expects color images
 vid_clip = clip1.fl_image(process_image)

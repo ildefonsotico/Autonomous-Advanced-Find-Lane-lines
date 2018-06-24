@@ -271,6 +271,7 @@ def histogram(img):
     plt.savefig(out_path + 'histogram.png')
 
 def sliding_window(binary_warped, verbose=False):
+
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0] // 2:, :], axis=0)
     # Create an output image to draw on and  visualize the result
@@ -281,6 +282,8 @@ def sliding_window(binary_warped, verbose=False):
     leftx_base = np.argmax(histogram[:midpoint])
     rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 
+    plt.imshow(binary_warped)
+    plt.savefig(out_path + 'pre_sliding_window.png')
     # Choose the number of sliding windows
     nwindows = 9
     # Set height of windows
@@ -355,8 +358,6 @@ def sliding_window(binary_warped, verbose=False):
         plt.xlim(0, 1280)
         plt.ylim(720, 0)
         plt.savefig(out_path + 'sliding_window.png')
-        plt.savefig(out_path + 'fit_sliding_window.png')
-
     return left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx
 
 def get_line_fit_from_pre_defined(binary_warped, left_fit, right_fit, margin=100, verbose=False):
@@ -387,36 +388,37 @@ def get_line_fit_from_pre_defined(binary_warped, left_fit, right_fit, margin=100
     left_fitx = left_fit[0] * ploty ** 2 + left_fit[1] * ploty + left_fit[2]
     right_fitx = right_fit[0] * ploty ** 2 + right_fit[1] * ploty + right_fit[2]
 
-    # # Create an image to draw on and an image to show the selection window
-    # out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
-    # window_img = np.zeros_like(out_img)
-    # # Color in left and right line pixels
-    # out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-    # out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
-    #
-    # # Generate a polygon to illustrate the search window area
-    # # And recast the x and y points into usable format for cv2.fillPoly()
-    # left_line_window1 = np.array([np.transpose(np.vstack([left_fitx - margin, ploty]))])
-    # left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx + margin,
-    #                                                                 ploty])))])
-    # left_line_pts = np.hstack((left_line_window1, left_line_window2))
-    # right_line_window1 = np.array([np.transpose(np.vstack([right_fitx - margin, ploty]))])
-    # right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx + margin,
-    #                                                                  ploty])))])
-    # right_line_pts = np.hstack((right_line_window1, right_line_window2))
-    #
-    # # Draw the lane onto the warped blank image
-    # cv2.fillPoly(window_img, np.int_([left_line_pts]), (0, 255, 0))
-    # cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
-    # result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
-    # if (verbose):
-    #     plt.imshow(result)
-    #     plt.plot(left_fitx, ploty, color='yellow')
-    #     plt.plot(right_fitx, ploty, color='yellow')
-    #     plt.xlim(0, 1280)
-    #     plt.ylim(720, 0)
-    #     plt.savefig(out_path + 'sliding_pre_defined_window.png')
+
+    if (verbose):
+        # Create an image to draw on and an image to show the selection window
+        out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
+        window_img = np.zeros_like(out_img)
+        # Color in left and right line pixels
+        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
+        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+
+        # Generate a polygon to illustrate the search window area
+        # And recast the x and y points into usable format for cv2.fillPoly()
+        left_line_window1 = np.array([np.transpose(np.vstack([left_fitx - margin, ploty]))])
+        left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx + margin,
+                                                                        ploty])))])
+        left_line_pts = np.hstack((left_line_window1, left_line_window2))
+        right_line_window1 = np.array([np.transpose(np.vstack([right_fitx - margin, ploty]))])
+        right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx + margin,
+                                                                         ploty])))])
+        right_line_pts = np.hstack((right_line_window1, right_line_window2))
+
+        # Draw the lane onto the warped blank image
+        cv2.fillPoly(window_img, np.int_([left_line_pts]), (0, 255, 0))
+        cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
+        result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
+        plt.imshow(result)
+        plt.plot(left_fitx, ploty, color='yellow')
+        plt.plot(right_fitx, ploty, color='yellow')
+        plt.xlim(0, 1280)
+        plt.ylim(720, 0)
+        plt.savefig(out_path + 'sliding_pre_defined_window.png')
 
     return left_lane_inds, right_lane_inds, left_fit, right_fit, left_fitx, right_fitx
 
