@@ -105,8 +105,8 @@ This resulted in the following source and destination points:
 | 250, 690     | 320, 720      |
 | 590, 450      | 320, 0        |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-![combined_binary](https://user-images.githubusercontent.com/19958282/41875325-f82b53a8-78a0-11e8-96c1-757fd3930bfb.png)
+I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image.
+![combined_warp](https://user-images.githubusercontent.com/19958282/41875956-c6f14f3e-78a2-11e8-8485-63090a673bfd.png)
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
