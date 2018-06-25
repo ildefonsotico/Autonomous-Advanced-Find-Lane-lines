@@ -45,13 +45,11 @@ You're reading it!
 
 The code for this step is contained in the line (37) on the file called "find_lane_lines.py". It is used into the verbose_pipeline. This pipeline is used once, to calibrate and generate every pictures I need for the project. 
 
-I start by preparing "object points" and "imgae points", which will be the (x, y, z) coordinates of the chessboard corners. Here I am got 9x6 corners into the chessboard. I used different cheesboard pictures. Each one was took by different angle, then the object points are different for each calibration image.  Thus, `objpoints` will be appended by each cheesboard processed. I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
-
+I start by preparing "object points" and "imgae points", which will be the (x, y, z) coordinates of the chessboard corners. Here I am got 9x6 corners into the chessboard. I used different cheesboard pictures. Each one was took by different angle, then the object points are different for each calibration image.  Thus, `objpoints` will be appended by each cheesboard processed. I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection. 
 ![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
 ![image_korners - copy](https://user-images.githubusercontent.com/19958282/41870027-365a99fa-7891-11e8-82e1-b198164bf82c.png)
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
-
 ![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
 ![image_undistorded - copy](https://user-images.githubusercontent.com/19958282/41870060-4b1b071c-7891-11e8-81b4-e859fb537a21.png)
 
@@ -83,43 +81,41 @@ Combined binary image - SobelX, SobelY, Magnitude Gradient, Directional Gradient
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `warp()`, which appears in lines 118 through 143 in the file `utilities.py` (/utilities.py).  The `warp()` function takes as inputs an image (`img`).  I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+#source image
+ src = np.float32([[690, 450],
+                   [1040, 685],
+                   [250, 690],
+                   [590, 450]]
+                   )
+#destination image
+dst = np.float32([[980, 0], [980, 720], [320, 720], [320, 0]])
 ```
 
 This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 690, 450      | 980, 0        | 
+| 1040, 685      | 980, 720      |
+| 250, 690     | 320, 720      |
+| 590, 450      | 320, 0        |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
-![alt text][image4]
+![combined_bin_warped](https://user-images.githubusercontent.com/19958282/41871245-bf18bc06-7894-11e8-942b-eb100ce0eafc.png)
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
-
-![alt text][image5]
+![sliding_pre_defined_window](https://user-images.githubusercontent.com/19958282/41871418-48720156-7895-11e8-844c-6d7f6114ea55.png)
+![sliding_window](https://user-images.githubusercontent.com/19958282/41871420-48be732e-7895-11e8-9307-93682b7e386f.png)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+I did this in lines # 84 through 86# in my code in `find_lane_lines.py`
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
