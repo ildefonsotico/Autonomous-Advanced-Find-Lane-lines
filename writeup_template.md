@@ -50,6 +50,7 @@ I start by preparing "object points" and "imgae points", which will be the (x, y
 ![korners_cheesboard](https://user-images.githubusercontent.com/19958282/41874674-f1544b68-789e-11e8-9534-173ccff81a43.png)
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+
 ![cheesboard_undistorted](https://user-images.githubusercontent.com/19958282/41874733-15666572-789f-11e8-9707-702feca7810c.png)
 
 
@@ -58,26 +59,27 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 #### 1. Provide an example of a distortion-corrected image.
 
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![image_calc_undistorded](https://user-images.githubusercontent.com/19958282/41870092-6a5b6018-7891-11e8-821b-97c895854062.png)
+
+![undistorted_image](https://user-images.githubusercontent.com/19958282/41874822-5f505c92-789f-11e8-8fd1-b2255091e1fb.png)
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
 I used a combination of color (RGB to HLS) and gradient thresholds (Direction and Magnitude) to generate a binary image (thresholding steps at lines # 10 to 54 # in `utilities.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
 ##### Magnitude Gradient - Kernel=15, Threshold (30, 100)
-![binary_magnitude](https://user-images.githubusercontent.com/19958282/41870335-266fcd0c-7892-11e8-8116-698e2026847a.png)
+![magnitude_gradient](https://user-images.githubusercontent.com/19958282/41874900-a34e5eda-789f-11e8-8136-fa795f034bba.png)
 
 ##### Direction Gradient - Kernel=15, Threshold (0.7, 1.3)
-![binary_direction](https://user-images.githubusercontent.com/19958282/41870329-23375916-7892-11e8-81f8-46129dd4aabc.png)
+![directional_gradient](https://user-images.githubusercontent.com/19958282/41875004-ef764930-789f-11e8-9045-ab5902d527d8.png)
 
 ##### Sobel X - Threshold (30, 100)
-![sobel_x](https://user-images.githubusercontent.com/19958282/41870696-2996a9fa-7893-11e8-8178-c37bc6df6ad1.png)
+![sobelx](https://user-images.githubusercontent.com/19958282/41875146-5e994646-78a0-11e8-83c1-76594f41ee3f.png)
 
 ##### Sobel Y - Threshold (30, 100)
-![sobel_y](https://user-images.githubusercontent.com/19958282/41870700-2b57d0c0-7893-11e8-8355-f7345e6ad057.png)
+![sobely](https://user-images.githubusercontent.com/19958282/41875206-8e7b5a34-78a0-11e8-9e7a-9a7848a1dac4.png)
 
 ##### Combined binary image - SobelX, SobelY, Magnitude Gradient, Directional Gradient
-![binary_combined](https://user-images.githubusercontent.com/19958282/41870341-2c85b238-7892-11e8-8339-9738bfe4e329.png)
+![combined_binary](https://user-images.githubusercontent.com/19958282/41875266-b992d29c-78a0-11e8-91ee-985a89a21d08.png)
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
