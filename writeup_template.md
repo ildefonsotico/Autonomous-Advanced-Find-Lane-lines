@@ -50,9 +50,10 @@ I start by preparing "object points" and "imgae points", which will be the (x, y
 ![image_korners - copy](https://user-images.githubusercontent.com/19958282/41870027-365a99fa-7891-11e8-82e1-b198164bf82c.png)
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+<p float="left">
 ![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
 ![image_undistorded - copy](https://user-images.githubusercontent.com/19958282/41870060-4b1b071c-7891-11e8-81b4-e859fb537a21.png)
-
+</p>
 ### Pipeline (single images)
 
 #### 1. Provide an example of a distortion-corrected image.
@@ -130,11 +131,3 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a [link to my video result](./project_video.mp4)
-
----
-
-### Discussion
-
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
