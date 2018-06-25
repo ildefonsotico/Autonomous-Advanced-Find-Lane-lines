@@ -106,14 +106,13 @@ This resulted in the following source and destination points:
 | 590, 450      | 320, 0        |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![combined_bin_warped](https://user-images.githubusercontent.com/19958282/41871245-bf18bc06-7894-11e8-942b-eb100ce0eafc.png)
+![combined_binary](https://user-images.githubusercontent.com/19958282/41875325-f82b53a8-78a0-11e8-96c1-757fd3930bfb.png)
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
-![sliding_pre_defined_window](https://user-images.githubusercontent.com/19958282/41871418-48720156-7895-11e8-844c-6d7f6114ea55.png)
-![sliding_window](https://user-images.githubusercontent.com/19958282/41871420-48be732e-7895-11e8-9307-93682b7e386f.png)
+![polifit2](https://user-images.githubusercontent.com/19958282/41875709-232872d8-78a2-11e8-8e1d-af83a4ebd0a6.png)
+![polifit](https://user-images.githubusercontent.com/19958282/41875449-4ac85462-78a1-11e8-8267-9845f6c77383.png)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -123,7 +122,7 @@ I did this in lines # 84 through 86# in my code in `find_lane_lines.py`
 
 I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
 
-![alt text][image6]
+![draw_lane](https://user-images.githubusercontent.com/19958282/41875618-cf7eacf6-78a1-11e8-8dbf-225a2a8b89d7.png)
 
 ---
 
