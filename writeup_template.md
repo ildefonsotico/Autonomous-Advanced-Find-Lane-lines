@@ -47,26 +47,39 @@ The code for this step is contained in the line (37) on the file called "find_la
 
 I start by preparing "object points" and "imgae points", which will be the (x, y, z) coordinates of the chessboard corners. Here I am got 9x6 corners into the chessboard. I used different cheesboard pictures. Each one was took by different angle, then the object points are different for each calibration image.  Thus, `objpoints` will be appended by each cheesboard processed. I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
-![calibration17](https://user-images.githubusercontent.com/19958282/41869627-f65f2e70-788f-11e8-8137-ce18157f4963.jpg)
-![image_korners - copy](https://user-images.githubusercontent.com/19958282/41869612-ec4b0062-788f-11e8-98c4-f320f0dbc8ba.png)
+![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
+![image_korners - copy](https://user-images.githubusercontent.com/19958282/41870027-365a99fa-7891-11e8-82e1-b198164bf82c.png)
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
 
-![calibration18](https://user-images.githubusercontent.com/19958282/41869711-32a1e206-7890-11e8-959e-2915cc1ab2ab.jpg)
-![image_undistorded - copy 3](https://user-images.githubusercontent.com/19958282/41869703-2991b4d4-7890-11e8-9dfc-531042e06373.png)
+![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
+![image_undistorded - copy](https://user-images.githubusercontent.com/19958282/41870060-4b1b071c-7891-11e8-81b4-e859fb537a21.png)
 
 ### Pipeline (single images)
 
 #### 1. Provide an example of a distortion-corrected image.
 
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+![image_calc_undistorded](https://user-images.githubusercontent.com/19958282/41870092-6a5b6018-7891-11e8-821b-97c895854062.png)
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+I used a combination of color (RGB to HLS) and gradient thresholds (Direction and Magnitude) to generate a binary image (thresholding steps at lines # 10 to 54 # in `utilities.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
-![alt text][image3]
+Magnitude Gradient - Kernel=15, Threshold (30, 100)
+![binary_magnitude](https://user-images.githubusercontent.com/19958282/41870335-266fcd0c-7892-11e8-8116-698e2026847a.png)
+
+Direction Gradient - Kernel=15, Threshold (0.7, 1.3)
+![binary_direction](https://user-images.githubusercontent.com/19958282/41870329-23375916-7892-11e8-81f8-46129dd4aabc.png)
+
+Sobel X - Threshold (30, 100)
+![sobel_x](https://user-images.githubusercontent.com/19958282/41870696-2996a9fa-7893-11e8-8178-c37bc6df6ad1.png)
+
+Sobel Y - Threshold (30, 100)
+![sobel_y](https://user-images.githubusercontent.com/19958282/41870700-2b57d0c0-7893-11e8-8355-f7345e6ad057.png)
+
+Combined binary image - SobelX, SobelY, Magnitude Gradient, Directional Gradient
+![binary_combined](https://user-images.githubusercontent.com/19958282/41870341-2c85b238-7892-11e8-8339-9738bfe4e329.png)
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
