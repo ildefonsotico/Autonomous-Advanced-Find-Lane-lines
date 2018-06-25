@@ -46,12 +46,11 @@ You're reading it!
 The code for this step is contained in the line (37) on the file called "find_lane_lines.py". It is used into the verbose_pipeline. This pipeline is used once, to calibrate and generate every pictures I need for the project. 
 
 I start by preparing "object points" and "imgae points", which will be the (x, y, z) coordinates of the chessboard corners. Here I am got 9x6 corners into the chessboard. I used different cheesboard pictures. Each one was took by different angle, then the object points are different for each calibration image.  Thus, `objpoints` will be appended by each cheesboard processed. I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection. 
-<p align="left">
-![original_image_korners - copy](https://user-images.githubusercontent.com/19958282/41870026-3606d266-7891-11e8-8990-78f25a660d36.png)
-![image_korners - copy](https://user-images.githubusercontent.com/19958282/41870027-365a99fa-7891-11e8-82e1-b198164bf82c.png)
-</p>
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+![original_cheesboard](https://user-images.githubusercontent.com/19958282/41874689-fa40e79a-789e-11e8-8638-46ca3a54d8d8.png)
+![korners_cheesboard](https://user-images.githubusercontent.com/19958282/41874674-f1544b68-789e-11e8-9534-173ccff81a43.png)
 
+I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+![cheesboard_undistorted](https://user-images.githubusercontent.com/19958282/41874733-15666572-789f-11e8-9707-702feca7810c.png)
 
 
 ### Pipeline (single images)
